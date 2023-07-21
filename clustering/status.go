@@ -14,6 +14,7 @@ import (
 	"github.com/cybozu-go/moco/pkg/constants"
 	"github.com/cybozu-go/moco/pkg/dbop"
 	"github.com/cybozu-go/moco/pkg/password"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -82,6 +83,7 @@ type StatusSet struct {
 	Cluster      *mocov1beta2.MySQLCluster
 	Password     *password.MySQLPassword
 	Pods         []*corev1.Pod
+	StatefulSet  *appsv1.StatefulSet
 	DBOps        []dbop.Operator
 	MySQLStatus  []*dbop.MySQLInstanceStatus
 	ExecutedGTID string
@@ -175,6 +177,18 @@ func (p *managerProcess) GatherStatus(ctx context.Context) (*StatusSet, error) {
 		}
 		ss.Pods[index] = &pods.Items[i]
 	}
+
+	statefulSets := &appsv1.StatefulSetList{}
+	if err := p.client.List(ctx, statefulSets, client.InNamespace(p.name.Namespace), client.MatchingLabels{
+		constants.LabelAppName:     constants.AppNameMySQL,
+		constants.LabelAppInstance: p.name.Name,
+	}); err != nil {
+		return nil, fmt.Errorf("failed to list StatefulSets: %w", err)
+	}
+	if len(statefulSets.Items) != 1 {
+		return nil, fmt.Errorf("there are more than one StatefulSets: %w", err)
+	}
+	ss.StatefulSet = &statefulSets.Items[0]
 
 	ss.DBOps = make([]dbop.Operator, cluster.Spec.Replicas)
 	defer func() {

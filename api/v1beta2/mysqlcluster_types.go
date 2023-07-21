@@ -622,7 +622,7 @@ type MySQLClusterCondition struct {
 }
 
 // MySQLClusterConditionType is the type of MySQLCluster condition.
-// +kubebuilder:validation:Enum=Initialized;Available;Healthy
+// +kubebuilder:validation:Enum=Initialized;Available;Healthy;Updated
 type MySQLClusterConditionType string
 
 // Valid values for MySQLClusterConditionType
@@ -630,6 +630,7 @@ const (
 	ConditionInitialized MySQLClusterConditionType = "Initialized"
 	ConditionAvailable   MySQLClusterConditionType = "Available"
 	ConditionHealthy     MySQLClusterConditionType = "Healthy"
+	ConditionUpdated     MySQLClusterConditionType = "Updated"
 )
 
 // BackupStatus represents the status of the last successful backup.

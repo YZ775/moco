@@ -273,10 +273,15 @@ func (p *managerProcess) updateStatus(ctx context.Context, ss *StatusSet) error 
 		case StateLost:
 		case StateIncomplete:
 		}
+		updated := corev1.ConditionFalse
+		if ss.StatefulSet.Status.CurrentRevision == ss.StatefulSet.Status.UpdateRevision && ss.StatefulSet.Status.CurrentReplicas == ss.StatefulSet.Status.UpdatedReplicas {
+			updated = corev1.ConditionTrue
+		}
 		conditions := []mocov1beta2.MySQLClusterCondition{
 			updateCond(mocov1beta2.ConditionInitialized, initialized, cluster.Status.Conditions),
 			updateCond(mocov1beta2.ConditionAvailable, available, cluster.Status.Conditions),
 			updateCond(mocov1beta2.ConditionHealthy, healthy, cluster.Status.Conditions),
+			updateCond(mocov1beta2.ConditionUpdated, updated, cluster.Status.Conditions),
 		}
 		cluster.Status.Conditions = conditions
 		if available == corev1.ConditionTrue {

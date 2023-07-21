@@ -12368,6 +12368,7 @@ spec:
                       - Initialized
                       - Available
                       - Healthy
+                      - Updated
                       type: string
                   required:
                   - lastTransitionTime
